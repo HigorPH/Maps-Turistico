@@ -1,7 +1,6 @@
 package com.example.itanestourmyapplication;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -9,9 +8,19 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class DetalleActivity extends AppCompatActivity {
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+public class DetalleActivity extends AppCompatActivity implements OnMapReadyCallback {
     private boolean esFavorito;
     private DBHelper dbHelper;
+    private double latitud;
+    private double longitud;
+    private String nombre;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,10 +37,10 @@ public class DetalleActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         int id = intent.getIntExtra("id", 0);
-        String nombre = intent.getStringExtra("nombre");
+        nombre = intent.getStringExtra("nombre");
         String descripcion = intent.getStringExtra("descripcion");
-        double latitud = intent.getDoubleExtra("latitud", 0.0);
-        double longitud = intent.getDoubleExtra("longitud", 0.0);
+        latitud = intent.getDoubleExtra("latitud", 0.0);
+        longitud = intent.getDoubleExtra("longitud", 0.0);
         int imagenRes = intent.getIntExtra("imagen", 0);
         esFavorito = intent.getBooleanExtra("favorito", false);
 
@@ -40,18 +49,20 @@ public class DetalleActivity extends AppCompatActivity {
         ivFoto.setImageResource(imagenRes);
         actualizarTextoFavorito(btnFavorito);
 
-        // Ruta en Google Maps
-        btnRuta.setOnClickListener(v -> {
-            Uri gmmIntentUri = Uri.parse("google.navigation:q=" + latitud + "," + longitud + "&mode=d");
-            Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-            mapIntent.setPackage("com.google.android.apps.maps");
+        // Inicializar el mapa incrustado en la vista de detalle
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.mapFragment);
+        if (mapFragment != null) {
+            mapFragment.getMapAsync(this);
+        }
 
-            if (mapIntent.resolveActivity(getPackageManager()) != null) {
-                startActivity(mapIntent);
-            } else {
-                Uri fallback = Uri.parse("https://www.google.com/maps/dir/?api=1&destination=" + latitud + "," + longitud);
-                startActivity(new Intent(Intent.ACTION_VIEW, fallback));
-            }
+        // Abrir navegación GPS interna (Estilo Waze) dentro de la app sin salir de ella
+        btnRuta.setOnClickListener(v -> {
+            Intent mapIntent = new Intent(DetalleActivity.this, Maps_Activity.class);
+            mapIntent.putExtra("nombre", nombre);
+            mapIntent.putExtra("latitud", latitud);
+            mapIntent.putExtra("longitud", longitud);
+            startActivity(mapIntent);
         });
 
         // Alternar favorito
@@ -61,6 +72,14 @@ public class DetalleActivity extends AppCompatActivity {
             actualizarTextoFavorito(btnFavorito);
             Toast.makeText(this, esFavorito ? "Añadido a favoritos" : "Eliminado de favoritos", Toast.LENGTH_SHORT).show();
         });
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        LatLng coordenadas = new LatLng(latitud, longitud);
+        googleMap.addMarker(new MarkerOptions().position(coordenadas).title(nombre));
+        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordenadas, 15f));
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
     }
 
     private void actualizarTextoFavorito(Button btn) {

@@ -35,6 +35,14 @@
             android:lineSpacingMultiplier="1.2"
             android:textColor="#424242" />
 
+        <!-- Mapa de Google Maps incrustado directamente -->
+        <androidx.fragment.app.FragmentContainerView
+            android:id="@+id/mapFragment"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            android:layout_marginTop="16dp" />
+
         <Button
             android:id="@+id/btnRutaAuto"
             android:layout_width="match_parent"

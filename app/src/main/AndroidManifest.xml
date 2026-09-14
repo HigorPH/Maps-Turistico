@@ -6,6 +6,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /> <!-- Permisos para ubicacion en tiempo actual-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -16,6 +19,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ITANESTourMyApplication"
         android:usesCleartextTraffic="true">
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key" />
 
         <!-- Pantalla principal: Listado de los 5 puntos turísticos -->
         <activity
@@ -32,6 +38,10 @@
         <!-- Pantalla de detalle: Información, multimedia, favoritos y ruta -->
         <activity
             android:name=".DetalleActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".Maps_Activity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
     </application>
