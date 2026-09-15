@@ -28,5 +28,6 @@ public class MainActivity extends AppCompatActivity {
         List<PuntoTuristico> lista = dbHelper.obtenerTodosLosPuntos();
         adapter = new PuntoAdapter(this, lista);
         rvPuntos.setAdapter(adapter);
+        //d
     }
 }
