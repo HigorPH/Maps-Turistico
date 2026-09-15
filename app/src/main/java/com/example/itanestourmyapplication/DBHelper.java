@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DBHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "itanes_tour.db";
-    private static final int DATABASE_VERSION = 5;
+    private static final int DATABASE_VERSION = 6;
 
     public static final String TABLE_PUNTOS = "puntos_turisticos";
     public static final String COL_ID = "id";
@@ -36,7 +36,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 COL_DESCRIPCION + " TEXT, " +
                 COL_LATITUD + " REAL, " +
                 COL_LONGITUD + " REAL, " +
-                COL_IMAGEN_RES + " TEXT, " + // Almacenamos el nombre del drawable como String
+                COL_IMAGEN_RES + " TEXT, " +
                 COL_FAVORITO + " INTEGER DEFAULT 0)";
         db.execSQL(sql);
 
@@ -92,10 +92,55 @@ public class DBHelper extends SQLiteOpenHelper {
                 p.setDescripcion(cursor.getString(cursor.getColumnIndexOrThrow(COL_DESCRIPCION)));
                 p.setLatitud(cursor.getDouble(cursor.getColumnIndexOrThrow(COL_LATITUD)));
                 p.setLongitud(cursor.getDouble(cursor.getColumnIndexOrThrow(COL_LONGITUD)));
-                
-                // Resolver el ID del recurso drawable dinámicamente a partir del nombre de la imagen
+
                 String nombreImagen = cursor.getString(cursor.getColumnIndexOrThrow(COL_IMAGEN_RES));
-                int resId = context.getResources().getIdentifier(nombreImagen, "drawable", context.getPackageName());
+                int resId = 0;
+                try {
+                    // Si por alguna razón quedó un número guardado en texto, intentamos parsearlo o buscar por nombre
+                    if (nombreImagen != null && nombreImagen.matches("\\d+")) {
+                        int resNum = Integer.parseInt(nombreImagen);
+                        resId = resNum;
+                    } else {
+                        resId = context.getResources().getIdentifier(nombreImagen, "drawable", context.getPackageName());
+                    }
+                } catch (Exception e) {
+                    resId = 0;
+                }
+                p.setImagenResId(resId != 0 ? resId : R.drawable.logo_itanes);
+
+                p.setEsFavorito(cursor.getInt(cursor.getColumnIndexOrThrow(COL_FAVORITO)) == 1);
+                lista.add(p);
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        return lista;
+    }
+
+    public List<PuntoTuristico> obtenerPuntosFavoritos() {
+        List<PuntoTuristico> lista = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_PUNTOS + " WHERE " + COL_FAVORITO + " = 1", null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                PuntoTuristico p = new PuntoTuristico();
+                p.setId(cursor.getInt(cursor.getColumnIndexOrThrow(COL_ID)));
+                p.setNombre(cursor.getString(cursor.getColumnIndexOrThrow(COL_NOMBRE)));
+                p.setDescripcion(cursor.getString(cursor.getColumnIndexOrThrow(COL_DESCRIPCION)));
+                p.setLatitud(cursor.getDouble(cursor.getColumnIndexOrThrow(COL_LATITUD)));
+                p.setLongitud(cursor.getDouble(cursor.getColumnIndexOrThrow(COL_LONGITUD)));
+
+                String nombreImagen = cursor.getString(cursor.getColumnIndexOrThrow(COL_IMAGEN_RES));
+                int resId = 0;
+                try {
+                    if (nombreImagen != null && nombreImagen.matches("\\d+")) {
+                        resId = Integer.parseInt(nombreImagen);
+                    } else {
+                        resId = context.getResources().getIdentifier(nombreImagen, "drawable", context.getPackageName());
+                    }
+                } catch (Exception e) {
+                    resId = 0;
+                }
                 p.setImagenResId(resId != 0 ? resId : R.drawable.logo_itanes);
 
                 p.setEsFavorito(cursor.getInt(cursor.getColumnIndexOrThrow(COL_FAVORITO)) == 1);

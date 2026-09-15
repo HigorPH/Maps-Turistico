@@ -49,14 +49,14 @@ public class DetalleActivity extends AppCompatActivity implements OnMapReadyCall
         ivFoto.setImageResource(imagenRes);
         actualizarTextoFavorito(btnFavorito);
 
-        // Inicializar el mapa incrustado en la vista de detalle
+        // Inicializar el mini mapa incrustado
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapFragment);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
 
-        // Abrir navegación GPS interna (Estilo Waze) dentro de la app sin salir de ella
+        // Abrir la actividad de mapas estilo Waze al hacer clic en Ver Ruta
         btnRuta.setOnClickListener(v -> {
             Intent mapIntent = new Intent(DetalleActivity.this, Maps_Activity.class);
             mapIntent.putExtra("nombre", nombre);

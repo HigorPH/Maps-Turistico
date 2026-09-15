@@ -35,7 +35,7 @@
             android:lineSpacingMultiplier="1.2"
             android:textColor="#424242" />
 
-        <!-- Mapa de Google Maps incrustado directamente -->
+        <!-- Mini mapa de Google Maps incrustado -->
         <androidx.fragment.app.FragmentContainerView
             android:id="@+id/mapFragment"
             android:name="com.google.android.gms.maps.SupportMapFragment"
